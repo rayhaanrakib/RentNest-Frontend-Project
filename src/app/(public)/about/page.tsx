@@ -37,7 +37,7 @@ const AboutPage = () => {
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
             className="mt-6 text-lg text-slate-600 leading-relaxed"
           >
-            RentNest was born from a simple idea: finding a home shouldn't be stressful. We connect trusted landlords with verified tenants through a transparent, secure, and beautifully designed platform.
+            RentNest was born from a simple idea: finding a home shouldn&apos;t be stressful. We connect trusted landlords with verified tenants through a transparent, secure, and beautifully designed platform.
           </motion.p>
         </div>
       </section>

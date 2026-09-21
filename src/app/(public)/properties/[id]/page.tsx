@@ -14,13 +14,16 @@ import {
   Bed,
   Bath,
   Maximize,
-  Building2,
   CalendarDays,
   Tag,
 } from "lucide-react";
+import { LucideProps } from "lucide-react";
+import { ForwardRefExoticComponent, RefAttributes } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { getCurrentUser } from "@auth/_actions/authActions";
+import { IProperty } from "@/types";
+
+type LucideIcon = ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>;
 
 // Skeleton (Updated to match new layout)
 const PropertyDetailSkeleton = () => {
@@ -48,7 +51,7 @@ const PropertyDetailSkeleton = () => {
 };
 
 // Helper component for the new detail cards
-const DetailCard = ({ icon: Icon, label, value }: { icon: any, label: string, value: string }) => (
+const DetailCard = ({ icon: Icon, label, value }: { icon: LucideIcon, label: string, value: string }) => (
   <div className="p-5 bg-white border border-slate-100 rounded-2xl shadow-sm flex items-start gap-4">
     <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0">
       <Icon className="h-5 w-5 text-slate-500" />
@@ -65,11 +68,11 @@ const PropertyDetailContent = async ({ id }: { id: string }) => {
   const propertyData = await getPropertyDetail(id);
 
   // Fetch similar properties (limit to 3 as a STRING, since getProperties expects strings)
-  let similarProperties: any[] = [];
+  let similarProperties: IProperty[] = [];
   try {
     const similarRes = await getProperties({ limit: "3", page: "1" });
     // Filter out the current property just in case it appears in the list
-    similarProperties = (similarRes?.properties || []).filter((p: any) => p.id !== id).slice(0, 3);
+    similarProperties = (similarRes?.properties || []).filter((p: IProperty) => p.id !== id).slice(0, 3);
   } catch (error) {
     console.error("Failed to load similar properties", error);
   }
@@ -281,7 +284,7 @@ const PropertyDetailContent = async ({ id }: { id: string }) => {
               </Link>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {similarProperties.map((property: any) => (
+              {similarProperties.map((property: IProperty) => (
                 <PropertyCard key={property.id} property={property} />
               ))}
             </div>
@@ -299,7 +302,6 @@ const PropertyDetailPage = async ({
   params: Promise<{ id: string }>;
 }) => {
   const { id } = await params;
-  const user = await getCurrentUser();
   return (
     <Suspense fallback={<PropertyDetailSkeleton />}>
       <PropertyDetailContent id={id} />

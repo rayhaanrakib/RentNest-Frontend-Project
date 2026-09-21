@@ -1,4 +1,4 @@
-import { IPayment } from "@/types";
+import { IPayment, IReview } from "@/types";
 import {
   getPayments,
   getTenantRentalReviews,
@@ -48,7 +48,7 @@ const PaymentsPage = async () => {
               <tbody>
                 {payments.map((payment: IPayment) => {
                   const isReviewed = reviews.some(
-                    (review:any) =>
+                    (review: IReview) =>
                       review.property?.id === payment.rentalRequest?.propertyId,
                   );
 

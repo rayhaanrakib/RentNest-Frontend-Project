@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useState, useTransition } from "react";
 import { Star, X } from "lucide-react";
 import { postTenantRentalReview } from "@dashboard/tenant/_actions/tenantActions";
 import { IReviewState } from "@/types";
@@ -16,6 +16,7 @@ const ReviewModal = ({
   propertyName,
 }: ReviewModalProps) => {
   const router = useRouter();
+  const [, startTransition] = useTransition();
 
 const [isOpen, setIsOpen] = useState(false);
 const [rating, setRating] = useState(5);
@@ -27,11 +28,13 @@ const [state, formAction] = useActionState(
 
 useEffect(() => {
   if (state?.success) {
-    setIsOpen(false);
-    setRating(5);
+    startTransition(() => {
+      setIsOpen(false);
+      setRating(5);
+    });
     router.refresh();
   }
-}, [state, router]);
+}, [state, router, startTransition]);
 
   return (
     <>

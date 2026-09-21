@@ -140,7 +140,7 @@ export const getCurrentUser = async () => {
     const result = await res.json();
     if (result.success) return result.data;
     return null;
-  } catch (error) {
+  } catch {
     return null;
   }
 };

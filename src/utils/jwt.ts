@@ -7,10 +7,11 @@ const verifyToken = (token: string, secret: string) => {
             success: true,
             data: verifiedToken
         };
-    } catch (error: any) {
+    } catch (error) {
+        const message = error instanceof Error ? error.message : "Unknown error";
         return {
             success: false,
-            error: error.message
+            error: message
         }
     }
 }

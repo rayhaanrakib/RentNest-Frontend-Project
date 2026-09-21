@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowUpRight, Building2 } from "lucide-react";
 import { getAllProperties, getCategories } from "@public/_actions/getData";
+import { ICategory, IProperty } from "@/types";
 
 
 const CategoriesContent = async () => {
@@ -14,9 +15,9 @@ const CategoriesContent = async () => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      {categories.map((category: any) => {
+      {categories.map((category: ICategory) => {
         const categoryProperties = allProperties.filter(
-          (p: any) => p.category?.id === category.id
+          (p: IProperty) => p.category?.id === category.id
         );
 
         if (categoryProperties.length === 0) return null;
@@ -43,7 +44,7 @@ const CategoriesContent = async () => {
 
             {/* Properties List */}
             <div className="divide-y divide-slate-100 flex-grow">
-              {categoryProperties.map((property: any) => (
+              {categoryProperties.map((property: IProperty) => (
                 <Link
                   key={property.id}
                   href={`/properties/${property.id}`}

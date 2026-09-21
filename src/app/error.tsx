@@ -58,7 +58,7 @@ const Error = ({
         </h2>
 
         <p className="text-white/60 text-lg leading-relaxed max-w-md mx-auto">
-          We're sorry for the inconvenience. Our team has been notified. You can
+          We&apos;re sorry for the inconvenience. Our team has been notified. You can
           try again or head back to safety.
         </p>
 

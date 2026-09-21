@@ -67,10 +67,6 @@ const CategoriesList = async () => {
               {category._count?.properties ?? 0}{" "}
               {category._count?.properties === 1 ? "property" : "properties"}
             </span>
-
-            <span className="text-[11px] text-slate-400">
-              {formatDate(category.createdAt)}
-            </span>
           </div>
         </div>
       ))}

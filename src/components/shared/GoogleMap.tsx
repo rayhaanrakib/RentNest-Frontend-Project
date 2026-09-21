@@ -43,9 +43,6 @@ const mapOptions = {
 };
 
 function MapUnavailableFallback({
-  address,
-  city,
-  state,
   reason,
 }: {
   address: string;

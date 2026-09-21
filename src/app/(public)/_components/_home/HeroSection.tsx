@@ -1,133 +1,193 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion";
-import { Search, MapPin, Home, Building2, DollarSign, Star, Shield, Sparkles, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import GlassButton from "@/components/shared/GlassButton";
+import {
+  EASE_OUT_EXPO,
+  lineReveal,
+  staggerContainerSlow,
+} from "@/lib/motion";
+import type { ICategory } from "@/types";
+import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import {
+  ArrowRight,
+  BadgeCheck,
+  KeyRound,
+  LockKeyhole,
+  Sparkles,
+} from "lucide-react";
+import Image from "next/image";
+import { useRef } from "react";
+import HeroSearch from "./HeroSearch";
 
-const HomepageHeroSection = () => {
-  const router = useRouter();
+const HERO_IMAGE =
+  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2400&q=80";
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast.info("Advanced search is coming soon! 🚀");
-  };
+const trustChips = [
+  { icon: BadgeCheck, label: "Verified listings" },
+  { icon: LockKeyhole, label: "Secure Stripe payments" },
+  { icon: KeyRound, label: "Trusted landlords" },
+];
+
+interface HeroSectionProps {
+  categories: ICategory[];
+}
+
+const HomepageHeroSection = ({ categories }: HeroSectionProps) => {
+  const reduceMotion = useReducedMotion();
+
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
+  const imageY = useTransform(scrollYProgress, [0, 1], ["0%", "14%"]);
+  const contentY = useTransform(scrollYProgress, [0, 1], ["0%", "32%"]);
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.75], [1, 0]);
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden mesh-bg pt-20 pb-10">
-      {/* Background Gradient Overlays */}
-      <div className="absolute inset-0 bg-gradient-to-b from-white/50 via-white/70 to-white pointer-events-none" />
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-brand-300/20 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-blue-300/20 rounded-full blur-[120px] pointer-events-none" />
-
-      {/* Floating UI Elements */}
+    <section
+      ref={sectionRef}
+      aria-labelledby="hero-heading"
+      className="relative flex min-h-svh items-center overflow-hidden bg-ink"
+    >
+      {/* Background — slow Ken Burns settle + scroll parallax */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-        className="absolute top-[15%] right-[5%] hidden xl:block z-20"
+        aria-hidden="true"
+        className="absolute inset-0"
+        style={reduceMotion ? undefined : { y: imageY }}
       >
-        <div className="bg-white/70 backdrop-blur-xl p-4 rounded-3xl shadow-2xl border border-white/40 w-64 hover:scale-105 transition-transform duration-300">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center shadow-sm">
-              <Shield className="h-6 w-6 text-emerald-600" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-slate-800">Verified Listing</p>
-              <p className="text-xs text-slate-500">Checked by RentNest</p>
-            </div>
-          </div>
-        </div>
+        <motion.div
+          className="h-full w-full"
+          initial={reduceMotion ? false : { scale: 1.12 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 4.5, ease: EASE_OUT_EXPO }}
+        >
+          <Image
+            src={HERO_IMAGE}
+            alt="Sunlit modern living room of a RentNest home at golden hour"
+            fill
+            preload
+            sizes="100vw"
+            className="object-cover"
+          />
+        </motion.div>
       </motion.div>
 
-      <motion.div
-        initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}
-        className="absolute bottom-[60%] left-[5%] hidden xl:block z-20"
-      >
-        <div className="bg-white/30 backdrop-blur-xl p-5 rounded-3xl shadow-2xl border border-white/40 w-64 hover:scale-105 transition-transform duration-300">
-          <div className="flex items-center gap-2 mb-2">
-            {[...Array(5)].map((_, i) => <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />)}
-          </div>
-          <p className="text-xs text-slate-600 italic leading-relaxed">"Found my dream apartment in 2 days! The process was seamless."</p>
-          <div className="flex items-center gap-2 mt-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white text-xs font-bold">S</div>
-            <p className="text-xs font-bold text-slate-800">Sarah T.</p>
-          </div>
-        </div>
-      </motion.div>
+      {/* Contrast gradients (WCAG AA over imagery) */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-gradient-to-b from-ink/85 via-ink/45 to-ink/85"
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-gradient-to-r from-ink/50 via-transparent to-ink/30"
+      />
 
-      <div className="container mx-auto px-4 py-20 relative z-10">
-        <div className="max-w-3xl mx-auto text-center">
+      <motion.div
+        className="relative z-10 mx-auto w-full max-w-7xl px-4 pb-24 pt-32 sm:px-6 md:pb-28 md:pt-36 lg:px-8"
+        style={
+          reduceMotion
+            ? undefined
+            : { y: contentY, opacity: contentOpacity }
+        }
+      >
+        <motion.div
+          variants={staggerContainerSlow}
+          initial="hidden"
+          animate="visible"
+          className="mx-auto flex max-w-4xl flex-col items-center text-center"
+        >
           <motion.span
-            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 backdrop-blur-md text-brand-700 text-sm font-semibold border border-brand-100 shadow-sm mb-8"
+            variants={lineReveal}
+            className="glass-chip mb-6 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-white/90 sm:text-sm"
           >
-            <Sparkles className="h-3.5 w-3.5" /> Join today and start your journey!
+            <Sparkles className="h-4 w-4 text-amber-300" aria-hidden="true" />
+            The trusted way to rent
           </motion.span>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="text-4xl md:text-6xl font-bold tracking-tight text-slate-900 leading-[1.1]"
+          <h1
+            id="hero-heading"
+            className="font-display text-display font-semibold text-white"
           >
-            Find Your Next <br />
-            <span className="gradient-text">Perfect Home</span>
-          </motion.h1>
+            <span className="block overflow-hidden pb-1">
+              <motion.span variants={lineReveal} className="block">
+                Find a home that
+              </motion.span>
+            </span>
+            <span className="block overflow-hidden pb-2">
+              <motion.span variants={lineReveal} className="block">
+                feels{" "}
+                <em className="gradient-text-warm not-italic">
+                  like you.
+                </em>
+              </motion.span>
+            </span>
+          </h1>
 
           <motion.p
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            className="mt-6 text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed"
+            variants={lineReveal}
+            className="mt-6 max-w-2xl text-lead text-white/75"
           >
-            Discover hundreds of verified properties. Connect directly with landlords and move in with confidence.
+            Browse verified homes, request your move-in, get approved, and pay
+            securely — all in one calm, beautiful place.
           </motion.p>
 
-          {/* Search Bar (Coming Soon) */}
-          <motion.form
-            onSubmit={handleSearch}
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-            className="mt-12 relative bg-white/60 backdrop-blur-xl rounded-[1.75rem] shadow-2xl border border-white/50 p-2 flex flex-col md:flex-row gap-2"
+          <motion.div
+            variants={lineReveal}
+            className="mt-9 flex flex-col items-center gap-3 sm:flex-row"
           >
-            <div className="flex-1 flex items-center gap-2 px-4 py-3 border-b md:border-b-0 md:border-r border-slate-200/50 opacity-60 cursor-not-allowed">
-              <MapPin className="h-5 w-5 text-slate-400" />
-              <input
-                type="text" placeholder="Location"
-                className="w-full bg-transparent outline-none text-sm text-slate-700 placeholder-slate-400 cursor-not-allowed"
-                disabled
-              />
-            </div>
-            <div className="flex-1 flex items-center gap-2 px-4 py-3 border-b md:border-b-0 md:border-r border-slate-200/50 opacity-60 cursor-not-allowed">
-              <Home className="h-5 w-5 text-slate-400" />
-              <select
-                className="w-full bg-transparent outline-none text-sm text-slate-700 cursor-not-allowed"
-                disabled
-              >
-                <option value="">All Types</option>
-                <option value="apartments">Apartments</option>
-                <option value="houses">Houses</option>
-                <option value="villas">Villas</option>
-              </select>
-            </div>
-            <div className="flex-1 flex items-center gap-2 px-4 py-3 opacity-60 cursor-not-allowed">
-              <DollarSign className="h-5 w-5 text-slate-400" />
-              <input
-                type="number" placeholder="Max Budget"
-                className="w-full bg-transparent outline-none text-sm text-slate-700 placeholder-slate-400 cursor-not-allowed"
-                disabled
-              />
-            </div>
-            <Button type="submit" size="lg" className="w-full md:w-auto cursor-not-rounded-xl">
-              <Search className="h-4 w-4" /> Search
-            </Button>
-          </motion.form>
+            <GlassButton href="/properties" size="lg">
+              Browse properties
+              <ArrowRight className="h-5 w-5" aria-hidden="true" />
+            </GlassButton>
+            <GlassButton href="/register" variant="ghost" size="lg">
+              List your property
+            </GlassButton>
+          </motion.div>
 
-          <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="rounded-full text-base font-medium px-8 py-8 shadow-lg hover:shadow-xl transition-shadow" onClick={() => router.push("/properties")}>
-              Browse Properties <ArrowRight className="h-4 w-4 ml-1" />
-            </Button>
-            <Button variant="outline" size="lg" className="rounded-full text-base font-medium px-8 py-8 bg-white/50 backdrop-blur-md border-slate-200 hover:bg-white" onClick={() => router.push("/landlord/dashboard")}>
-              <Building2 className="h-4 w-4 mr-1" /> List Your Property
-            </Button>
-          </div>
-        </div>
-      </div>
+          <motion.div variants={lineReveal} className="mt-10 w-full max-w-3xl">
+            <HeroSearch categories={categories} />
+          </motion.div>
+
+          <motion.ul
+            variants={lineReveal}
+            className="mt-8 flex flex-wrap items-center justify-center gap-2.5"
+          >
+            {trustChips.map((chip) => (
+              <li
+                key={chip.label}
+                className="glass-chip inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-medium text-white/85 sm:text-sm"
+              >
+                <chip.icon
+                  className="h-4 w-4 text-brand-300"
+                  aria-hidden="true"
+                />
+                {chip.label}
+              </li>
+            ))}
+          </motion.ul>
+        </motion.div>
+      </motion.div>
+
+      {/* Scroll cue */}
+      <motion.div
+        aria-hidden="true"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.6, duration: 0.8 }}
+        className="absolute bottom-6 left-1/2 z-10 hidden -translate-x-1/2 flex-col items-center gap-2 md:flex"
+      >
+        <span className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-white/50">
+          Scroll
+        </span>
+        <span className="flex h-9 w-5 items-start justify-center rounded-full border border-white/25 p-1.5">
+          <motion.span
+            className="h-2 w-1 rounded-full bg-white/70"
+            animate={reduceMotion ? undefined : { y: [0, 10, 0], opacity: [1, 0.35, 1] }}
+            transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </span>
+      </motion.div>
     </section>
   );
 };

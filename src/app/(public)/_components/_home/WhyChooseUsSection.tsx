@@ -1,86 +1,179 @@
 "use client";
 
+import Container from "@/components/shared/Container";
+import SectionHeader from "@/components/shared/SectionHeader";
+import { riseItem, staggerContainer } from "@/lib/motion";
+import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { ShieldCheck, UserCheck, Search, MessageSquare } from "lucide-react";
+import {
+  BadgeCheck,
+  CreditCard,
+  Eye,
+  LayoutDashboard,
+  LockKeyhole,
+  MessagesSquare,
+  ShieldCheck,
+  SlidersHorizontal,
+  type LucideIcon,
+} from "lucide-react";
 
-const features = [
-  { title: "100% Verified Listings", desc: "Every property is meticulously checked to ensure what you see is exactly what you get.", icon: ShieldCheck },
-  { title: "Vetted Landlords", desc: "We verify all landlords to ensure a safe, reliable, and transparent renting experience.", icon: UserCheck },
-  { title: "Smart Search Filters", desc: "Powerful and intuitive filters help you find your dream home in minutes, not days.", icon: Search },
-  { title: "Private Messaging", desc: "Chat directly with landlords through our secure platform without sharing personal info.", icon: MessageSquare },
+interface BentoCard {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  className?: string;
+  /** Optional extra content rendered under the copy. */
+  extra?: React.ReactNode;
+}
+
+const verifiedHighlights = [
+  "On-ground photo & document checks",
+  "Landlord identity verification",
+  "Delisted the moment it's rented",
 ];
 
+const cards: BentoCard[] = [
+  {
+    icon: ShieldCheck,
+    title: "100% verified listings",
+    description:
+      "Every home is checked before it goes live — what you see on RentNest is what greets you at the door.",
+    className: "md:col-span-2",
+    extra: (
+      <ul className="mt-6 space-y-2.5">
+        {verifiedHighlights.map((item) => (
+          <li
+            key={item}
+            className="flex items-center gap-2.5 text-sm text-slate-300"
+          >
+            <BadgeCheck
+              className="h-4 w-4 shrink-0 text-brand-400"
+              aria-hidden="true"
+            />
+            {item}
+          </li>
+        ))}
+      </ul>
+    ),
+  },
+  {
+    icon: LockKeyhole,
+    title: "Secure Stripe payments",
+    description:
+      "Deposits and rent move through Stripe's PCI-DSS certified checkout — never through DMs.",
+  },
+  {
+    icon: LayoutDashboard,
+    title: "Role-based dashboards",
+    description:
+      "Tenants, landlords, and admins each get a workspace tuned to their job.",
+  },
+  {
+    icon: Eye,
+    title: "Transparent process",
+    description:
+      "Track every request from pending to approved — no silent rejections, ever.",
+  },
+  {
+    icon: SlidersHorizontal,
+    title: "Search that respects your time",
+    description:
+      "City, category, and budget filters that behave the way you expect — find a shortlist in minutes, not days.",
+    className: "md:col-span-2",
+    extra: (
+      <div className="mt-6 flex flex-wrap gap-2">
+        {["Search by area", "Property type", "Availability"].map((chip) => (
+          <span
+            key={chip}
+            className="rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-slate-300"
+          >
+            {chip}
+          </span>
+        ))}
+      </div>
+    ),
+  },
+  {
+    icon: MessagesSquare,
+    title: "Support that answers",
+    description:
+      "Real humans on the other side — reach us whenever a move matters.",
+  },
+];
+
+/** Dark bento grid of RentNest benefits with hover micro-interactions. */
 const HomepageWhyChooseUsSection = () => {
   return (
-    <section className="relative py-24 md:py-32 bg-slate-950 overflow-hidden">
-      {/* Subtle background grid and glow */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-      <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-brand-500/10 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+    <section
+      aria-labelledby="why-rentnest-heading"
+      className="relative overflow-hidden bg-ink py-20 text-slate-100 md:py-28"
+    >
+      <div aria-hidden="true" className="absolute inset-0 bg-grid-faint" />
+      <div
+        aria-hidden="true"
+        className="absolute -left-32 top-0 h-96 w-96 rounded-full bg-brand-500/15 blur-[130px]"
+      />
+      <div
+        aria-hidden="true"
+        className="absolute -right-24 bottom-0 h-80 w-80 rounded-full bg-amber-400/10 blur-[120px]"
+      />
 
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="grid lg:grid-cols-3 gap-12 lg:gap-16 items-start">
+      <Container className="relative z-10">
+        <SectionHeader
+          eyebrow="The RentNest advantage"
+          title={
+            <>
+              Renting, re-engineered
+              <br className="hidden sm:block" /> around trust
+            </>
+          }
+          subtitle="Everything on the platform exists to make the two sides of a lease trust each other faster."
+          tone="dark"
+          headingId="why-rentnest-heading"
+        />
 
-          {/* Left Column: Header */}
-          <div className="lg:col-span-1 lg:sticky lg:top-32">
-            <motion.span
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="inline-block px-3 py-1 text-xs font-medium tracking-wider uppercase text-brand-400 bg-brand-500/10 rounded-full mb-6 border border-brand-500/20"
+        <motion.div
+          variants={staggerContainer}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.15 }}
+          className="grid grid-cols-1 gap-4 md:grid-cols-3"
+        >
+          {cards.map((card) => (
+            <motion.div
+              key={card.title}
+              variants={riseItem}
+              whileHover={{ y: -6 }}
+              transition={{ type: "spring", stiffness: 260, damping: 22 }}
+              className={cn(
+                "group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.045] p-6 transition-colors duration-300 hover:border-brand-400/40 md:p-7",
+                card.className,
+              )}
             >
-              The RentNest Advantage
-            </motion.span>
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-4xl md:text-5xl font-bold tracking-tight text-white leading-[1.1]"
-            >
-              Why choose <br />
-              <span className="text-brand-400">RentNest?</span>
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="mt-6 text-slate-400 text-lg leading-relaxed"
-            >
-              We make renting simple, safe, and transparent. Experience the future of property hunting today.
-            </motion.p>
-          </div>
-
-          {/* Right Column: 2x2 Feature Grid */}
-          <div className="lg:col-span-2 grid sm:grid-cols-2 gap-px bg-white/10 rounded-3xl overflow-hidden border border-white/10">
-            {features.map((feat, i) => (
-              <motion.div
-                key={feat.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ delay: i * 0.1, duration: 0.4 }}
-                className="group relative bg-slate-950 p-8 md:p-10 hover:bg-slate-900 transition-colors duration-300 ease-out"
-              >
-                {/* Icon */}
-                <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-6 group-hover:bg-brand-500 group-hover:border-brand-500 transition-colors duration-300">
-                  <feat.icon className="h-5 w-5 text-brand-400 group-hover:text-white transition-colors duration-300" />
-                </div>
-
-                {/* Text */}
-                <h3 className="text-xl font-bold text-white mb-3 tracking-tight">
-                  {feat.title}
-                </h3>
-                <p className="text-sm text-slate-400 leading-relaxed">
-                  {feat.desc}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-
-        </div>
-      </div>
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-brand-400/0 blur-3xl transition-colors duration-500 group-hover:bg-brand-400/20"
+              />
+              <span className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-400/30 to-brand-600/20 text-brand-300 ring-1 ring-white/10 transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110">
+                <card.icon className="h-5.5 w-5.5" aria-hidden="true" />
+              </span>
+              <h3 className="text-lg font-semibold text-white">{card.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-slate-400">
+                {card.description}
+              </p>
+              {card.extra}
+              {card.title === "Secure Stripe payments" ? (
+                <span className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-300">
+                  <CreditCard className="h-3.5 w-3.5" aria-hidden="true" />
+                  PCI-DSS Level 1 via Stripe
+                </span>
+              ) : null}
+            </motion.div>
+          ))}
+        </motion.div>
+      </Container>
     </section>
-  )
-}
+  );
+};
 
 export default HomepageWhyChooseUsSection;

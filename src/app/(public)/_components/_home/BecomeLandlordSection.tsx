@@ -1,120 +1,93 @@
-"use client";
-
-import { motion } from "framer-motion";
-import { Check, ArrowRight, Bell } from "lucide-react";
+import GlassButton from "@/components/shared/GlassButton";
+import RevealOnScroll from "@/components/shared/RevealOnScroll";
+import Section from "@/components/shared/Section";
+import { ArrowRight, Check, Handshake } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-const benefits = [
-  "Create unlimited property listings",
-  "Manage everything from one dashboard",
-  "Reach verified tenants instantly",
-  "Receive booking inquiries securely",
+const perks = [
+  "List a property in minutes with photos and amenities",
+  "Get requests from verified tenants, in one inbox",
+  "Approve, track, and get paid — all from your dashboard",
 ];
 
+/** Split image + copy band inviting owners to list on RentNest. */
 const HomepageBecomeLandlordSection = () => {
   return (
-    <section className="relative py-24 md:py-32 bg-foreground text-white overflow-hidden">
-      {/* Background Textures & Glows */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-      <div className="absolute top-1/4 right-0 w-[500px] h-[500px] bg-brand-500/20 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
-
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-
-          {/* Left Column: Content */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-          >
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-brand-300 text-xs font-semibold tracking-wider uppercase mb-8">
-              For Property Owners
+    <Section tone="default" ariaLabelledby="landlord-heading">
+      <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+        {/* Imagery */}
+        <RevealOnScroll className="relative" amount={0.25}>
+          <div className="relative aspect-[4/3] overflow-hidden rounded-[2rem] shadow-lift">
+            <Image
+              src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1600&q=80"
+              alt="Landlord handing over keys to a bright modern apartment"
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover transition-transform duration-[1.4s] ease-out hover:scale-105"
+            />
+          </div>
+          {/* Floating proof card */}
+          <div className="absolute -bottom-6 left-6 flex items-center gap-4 rounded-2xl border border-slate-100 bg-white/95 p-4 pr-6 shadow-lift backdrop-blur md:left-10">
+            <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+              <Handshake className="h-6 w-6" aria-hidden="true" />
             </span>
-
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter leading-[1.05] mb-6">
-              Turn your property <br />
-              into someone&apos;s <span className="text-brand-400">home.</span>
-            </h2>
-
-            <p className="text-white/60 text-lg leading-relaxed mb-10 max-w-xl">
-              List your property in minutes and connect with thousands of verified tenants looking for their next home. It&apos;s free, fast, and secure.
-            </p>
-
-            {/* Benefits Grid */}
-            <div className="grid sm:grid-cols-2 gap-x-8 gap-y-5 mb-12">
-              {benefits.map((benefit, i) => (
-                <motion.div
-                  key={benefit}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.1 + i * 0.1 }}
-                  className="group flex items-center gap-3"
-                >
-                  <div className="flex items-center justify-center w-6 h-6 rounded-full bg-brand-500/10 border border-brand-500/20 shrink-0 transition-colors group-hover:bg-brand-500 group-hover:border-brand-500">
-                    <Check className="h-3.5 w-3.5 text-brand-400 group-hover:text-white transition-colors" />
-                  </div>
-                  <span className="text-sm font-medium text-white/80">{benefit}</span>
-                </motion.div>
-              ))}
+            <div>
+              <p className="font-display text-2xl font-semibold text-slate-900">
+                3,200+
+              </p>
+              <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">
+                landlords earn with us
+              </p>
             </div>
+          </div>
+        </RevealOnScroll>
 
-            {/* CTA Button */}
-            <Link
-              href="/landlord/dashboard"
-              className="group inline-flex items-center justify-center gap-2 h-14 px-10 rounded-full bg-white text-foreground text-base font-semibold hover:bg-brand-400 hover:text-white transition-all shadow-lg hover:shadow-brand-500/20 hover:-translate-y-0.5"
-            >
-              Become a Landlord
-              <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-            </Link>
-          </motion.div>
-
-          {/* Right Column: Image with Floating Glass Card */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
-            className="relative hidden lg:block"
+        {/* Copy */}
+        <RevealOnScroll delay={0.1} amount={0.25}>
+          <span className="mb-4 inline-block rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">
+            For owners
+          </span>
+          <h2
+            id="landlord-heading"
+            className="font-display text-title font-semibold text-slate-900"
           >
-            <div className="relative h-[600px] rounded-[2rem] overflow-hidden shadow-2xl border border-white/10">
-              <Image
-                src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1200&auto=format&fit=crop"
-                alt="Modern property interior"
-                fill
-                className="object-cover"
-                sizes="50vw"
-              />
-              {/* Gradient overlay to blend image with dark theme */}
-              <div className="absolute inset-0 bg-gradient-to-t from-foreground via-foreground/20 to-transparent" />
-            </div>
+            Turn your property into steady income
+          </h2>
+          <p className="mt-4 text-lead text-slate-500">
+            RentNest handles the busywork — verified tenants, structured
+            requests, and secure payouts — so you can focus on the returns.
+          </p>
 
-            {/* Floating Glassmorphism Notification Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20, x: -20 }}
-              whileInView={{ opacity: 1, y: 0, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="absolute bottom-8 left-8 right-8 bg-white/10 backdrop-blur-xl p-6 rounded-3xl border border-white/20 shadow-xl flex items-center gap-5"
+          <ul className="mt-7 space-y-3.5">
+            {perks.map((perk) => (
+              <li key={perk} className="flex items-start gap-3 text-slate-700">
+                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-500/10 text-brand-600">
+                  <Check className="h-3.5 w-3.5" aria-hidden="true" />
+                </span>
+                <span className="text-sm leading-relaxed md:text-base">
+                  {perk}
+                </span>
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-9 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+            <GlassButton href="/register" variant="ink" size="lg">
+              Become a landlord
+              <ArrowRight className="h-5 w-5" aria-hidden="true" />
+            </GlassButton>
+            <Link
+              href="/#how-it-works"
+              className="text-sm font-semibold text-slate-900 underline decoration-brand-300 decoration-2 underline-offset-4 transition-colors hover:text-brand-600"
             >
-              <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-brand-500/20 border border-brand-500/30 shrink-0">
-                <Bell className="h-6 w-6 text-brand-300" />
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wider text-white/50 font-medium mb-1">New Inquiry</p>
-                <p className="text-base font-bold text-white leading-tight">You have a new tenant request!</p>
-                <p className="text-xs text-white/60 mt-1">Review and respond instantly from your dashboard.</p>
-              </div>
-            </motion.div>
-          </motion.div>
-
-        </div>
+              See how renting works
+            </Link>
+          </div>
+        </RevealOnScroll>
       </div>
-    </section>
-  )
-}
+    </Section>
+  );
+};
 
 export default HomepageBecomeLandlordSection;

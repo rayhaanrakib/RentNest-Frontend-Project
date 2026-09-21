@@ -19,37 +19,30 @@ export const authLinks = [
   { href: "/register", label: "Register" },
 ];
 
+// Only routes that actually exist today — no dead-end footer links.
 export const footerLinks = [
   {
     title: "Platform",
     links: [
       { href: "/properties", label: "Browse Properties" },
       { href: "/categories", label: "Categories" },
-      { href: "/become-landlord", label: "Become a Landlord" },
+      { href: "/#how-it-works", label: "How It Works" },
+      { href: "/register", label: "Become a Landlord" },
     ],
   },
   {
     title: "Company",
     links: [
       { href: "/about", label: "About Us" },
-      { href: "/careers", label: "Careers" },
-      { href: "/blog", label: "Blog" },
+      { href: "/#testimonials", label: "Testimonials" },
+      { href: "/#faq", label: "FAQs" },
     ],
   },
   {
-    title: "Support",
+    title: "Account",
     links: [
-      { href: "/help", label: "Help Center" },
-      { href: "/contact", label: "Contact Us" },
-      { href: "/faq", label: "FAQs" },
-    ],
-  },
-  {
-    title: "Legal",
-    links: [
-      { href: "/privacy", label: "Privacy Policy" },
-      { href: "/terms", label: "Terms of Service" },
-      { href: "/cookies", label: "Cookie Policy" },
+      { href: "/login", label: "Login" },
+      { href: "/register", label: "Create Account" },
     ],
   },
 ];

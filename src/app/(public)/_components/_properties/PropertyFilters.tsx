@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Search, Tag, DollarSign, CheckCircle } from "lucide-react";
+import { Search, Tag, CheckCircle } from "lucide-react";
 import { ICategory } from "@/types";
 
 interface PropertyFiltersProps {
@@ -17,7 +17,7 @@ const PropertyFilters = ({ categories }: PropertyFiltersProps) => {
   const currentCategory = searchParams.get("category") || "";
   const currentStatus = searchParams.get("status") || "";
 
-  const updateQueryParams = (key: string, value: string) => {
+  const updateQueryParams = useCallback((key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
 
     if (params.get(key) === value) return;
@@ -31,7 +31,7 @@ const PropertyFilters = ({ categories }: PropertyFiltersProps) => {
     params.delete("page");
 
     router.push(`/properties?${params.toString()}`);
-  };
+  }, [searchParams, router]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -39,7 +39,7 @@ const PropertyFilters = ({ categories }: PropertyFiltersProps) => {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [search]);
+  }, [search, updateQueryParams]);
 
   return (
     <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-2 mb-8 sticky top-24 z-30 backdrop-blur-xl bg-white/90">
