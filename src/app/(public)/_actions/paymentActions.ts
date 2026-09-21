@@ -8,7 +8,7 @@ export type PaymentState = {
   errorDetails?: string;
 };
 
-export const makePayment = async (prevState: PaymentState, formData: FormData) => {
+export const makePayment = async (prevState: PaymentState | null, formData: FormData): Promise<PaymentState> => {
   const rentalRequestId = formData.get("rentalRequestId") as string;
 
   if (!rentalRequestId) {

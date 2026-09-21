@@ -75,7 +75,7 @@ export const loginAction = async (redirectTo: string, prevState: AuthState, form
   };
 };
 
-export const registerAction = async (prevState: AuthState, formData: FormData): Promise<AuthState> => {
+export const registerAction = async (prevState: AuthState | null, formData: FormData): Promise<AuthState> => {
   const rawFormData = {
     name: formData.get("name"),
     email: formData.get("email"),

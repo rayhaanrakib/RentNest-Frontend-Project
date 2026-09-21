@@ -44,7 +44,7 @@ const PropertyModal = ({
       ? updateProperty.bind(null, propertyId)
       : createProperty;
 
-  const [state, formAction, pending] = useActionState(action, null);
+  const [state, formAction, pending] = useActionState(action, { success: false, message: "" });
 
   const handleClose = useCallback(() => onClose(), [onClose]);
 

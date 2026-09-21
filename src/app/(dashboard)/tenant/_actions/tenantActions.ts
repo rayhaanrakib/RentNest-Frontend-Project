@@ -122,7 +122,7 @@ export const getPayments = async () => {
 };
 
 export const postTenantRentalReview = async (
-  prevState: IReviewState,
+  prevState: IReviewState | null,
   formData: FormData
 ): Promise<IReviewState> => {
   const propertyId = formData.get("propertyId") as string;

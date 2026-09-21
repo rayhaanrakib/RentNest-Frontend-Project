@@ -108,7 +108,7 @@ export const createProperty = async (
 
 export const updateProperty = async (
   propertyId: string,
-  _prevState: ActionState,
+  _prevState: ActionState | null,
   formData: FormData,
 ) => {
   const headers = await getAuthHeaders(true);
