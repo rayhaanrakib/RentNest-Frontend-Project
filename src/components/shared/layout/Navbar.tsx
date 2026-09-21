@@ -13,8 +13,8 @@ import { SiteIcon } from "@/components/icons/sharedIcon";
 import { getCurrentUser, logoutAction } from "@auth/_actions/authActions";
 import { toast } from "sonner";
 
-// Define pages that have a dark hero image background here:
-const DARK_HERO_PATHS = ["/"];
+// Add any pages here that have a dark hero image/background
+const DARK_HERO_PATHS = ["/", "/about"];
 
 export function Navbar() {
   const pathname = usePathname();
@@ -30,7 +30,7 @@ export function Navbar() {
 
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  // Checks if current path has a dark hero background and is NOT scrolled yet.
+  // Checks if current path is in the dark hero list AND has not scrolled yet
   const isDarkBg = DARK_HERO_PATHS.includes(pathname) && !isScrolled;
 
   useEffect(() => {
