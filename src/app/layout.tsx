@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Fraunces, Manrope } from "next/font/google";
 import { Toaster } from "sonner";
+import CustomCursor from "@/components/shared/CustomCursor";
+import Preloader from "@/components/shared/Preloader";
+import RouteProgress from "@/components/shared/RouteProgress";
 import "./globals.css";
 
 /**
@@ -36,7 +39,10 @@ export default function RootLayout({
     >
       <body className="min-h-screen flex flex-col">
         <Toaster position="top-right" richColors />
+        <RouteProgress />
         {children}
+        <Preloader />
+        <CustomCursor />
       </body>
     </html>
   );
