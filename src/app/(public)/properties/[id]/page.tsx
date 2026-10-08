@@ -1,297 +1,431 @@
-import { Suspense } from "react";
+import Container from "@/components/shared/Container";
+import LocationMap from "@/components/shared/LocationMap";
+import SectionHeader from "@/components/shared/SectionHeader";
+import { getCurrentUser } from "@auth/_actions/authActions";
 import { getPropertyDetail, getProperties } from "@public/_actions/getData";
 import PropertyActions from "@public/_components/_properties/PropertyActions";
-import PropertyRentalRequestModal from "@public/_components/_properties/PropertyRentalRequestModal";
 import PropertyCard from "@public/_components/_properties/PropertyCard";
-import GoogleMapComponent from "@/components/shared/GoogleMap";
+import PropertyGallery from "@public/_components/_properties/PropertyGallery";
+import PropertyRentalRequestModal from "@public/_components/_properties/PropertyRentalRequestModal";
+import type { IProperty } from "@/types";
 import {
   ArrowLeft,
+  Bath,
+  BedDouble,
+  Building2,
   Check,
   Mail,
   MapPin,
+  Maximize,
   Phone,
   ShieldCheck,
-  Bed,
-  Bath,
-  Maximize,
-  CalendarDays,
-  Tag,
 } from "lucide-react";
-import { LucideProps } from "lucide-react";
-import { ForwardRefExoticComponent, RefAttributes } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { IProperty } from "@/types";
+import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
-type LucideIcon = ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>;
-
-// Skeleton (Updated to match new layout)
-const PropertyDetailSkeleton = () => {
-  return (
-    <div className="bg-white min-h-screen pt-32 pb-32 animate-pulse">
-      <div className="container mx-auto px-4 md:px-8">
-        <div className="h-5 w-36 rounded bg-slate-200 mb-8" />
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-12">
-          <div className="max-w-3xl space-y-4">
-            <div className="h-14 w-full max-w-lg rounded-xl bg-slate-200" />
-            <div className="h-5 w-72 rounded bg-slate-100" />
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[450px] md:h-[550px] mb-8 rounded-3xl overflow-hidden">
-          <div className="md:col-span-2 md:row-span-2 h-full bg-slate-100 rounded-3xl" />
-          <div className="hidden md:block h-full bg-slate-100 rounded-3xl" />
-          <div className="hidden md:block h-full bg-slate-100 rounded-3xl" />
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-          {[...Array(4)].map((_, i) => <div key={i} className="h-24 rounded-2xl bg-slate-100" />)}
-        </div>
+const PropertyDetailSkeleton = () => (
+  <div className="animate-pulse bg-white pb-24 pt-32">
+    <Container>
+      <div className="mb-8 h-5 w-40 rounded bg-slate-200" />
+      <div className="mb-6 space-y-3">
+        <div className="h-10 w-2/3 rounded-xl bg-slate-200" />
+        <div className="h-4 w-1/2 rounded bg-slate-100" />
       </div>
-    </div>
-  );
-};
+      <div className="h-[320px] rounded-3xl bg-slate-100 md:h-[520px]" />
+      <div className="mt-10 grid gap-10 lg:grid-cols-3">
+        <div className="space-y-6 lg:col-span-2">
+          <div className="h-40 rounded-2xl bg-slate-100" />
+          <div className="h-56 rounded-2xl bg-slate-100" />
+        </div>
+        <div className="h-96 rounded-3xl bg-slate-100" />
+      </div>
+    </Container>
+  </div>
+);
 
-// Helper component for the new detail cards
-const DetailCard = ({ icon: Icon, label, value }: { icon: LucideIcon, label: string, value: string }) => (
-  <div className="p-5 bg-white border border-slate-100 rounded-2xl shadow-sm flex items-start gap-4">
-    <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0">
-      <Icon className="h-5 w-5 text-slate-500" />
-    </div>
-    <div className="min-w-0">
-      <p className="text-xs uppercase tracking-wider text-slate-400 font-medium mb-1">{label}</p>
-      <p className="text-sm font-bold text-slate-800 truncate">{value}</p>
+const SpecItem = ({
+  icon: Icon,
+  value,
+  label,
+}: {
+  icon: typeof BedDouble;
+  value: string | number;
+  label: string;
+}) => (
+  <div className="flex items-center gap-3">
+    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-slate-50 text-slate-500">
+      <Icon className="h-5 w-5" aria-hidden="true" />
+    </span>
+    <div>
+      <p className="text-base font-bold leading-tight text-slate-900 tabular-nums">
+        {value}
+      </p>
+      <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-400">
+        {label}
+      </p>
     </div>
   </div>
 );
 
-// Content
 const PropertyDetailContent = async ({ id }: { id: string }) => {
-  const propertyData = await getPropertyDetail(id);
+  const [propertyData, user] = await Promise.all([
+    getPropertyDetail(id),
+    getCurrentUser(),
+  ]);
 
-  // Fetch similar properties (limit to 3 as a STRING, since getProperties expects strings)
-  let similarProperties: IProperty[] = [];
-  try {
-    const similarRes = await getProperties({ limit: "3", page: "1" });
-    // Filter out the current property just in case it appears in the list
-    similarProperties = (similarRes?.properties || []).filter((p: IProperty) => p.id !== id).slice(0, 3);
-  } catch (error) {
-    console.error("Failed to load similar properties", error);
+  if (!propertyData) {
+    notFound();
   }
 
-  return (
-    <div className="bg-white min-h-screen pt-32 pb-32">
-      <div className="container mx-auto px-4 md:px-8">
-        {/* Breadcrumb */}
-        <div className="flex items-center justify-between mb-8">
-          <Link
-            href="/properties"
-            className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors group"
-          >
-            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-            Back to properties
-          </Link>
-          <PropertyActions />
-        </div>
+  const property = propertyData as IProperty;
 
-        {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-12">
+  // Similar listings in the same category, excluding this one.
+  let similarProperties: IProperty[] = [];
+  try {
+    const similarRes = await getProperties({
+      limit: "4",
+      page: "1",
+      category: property.category?.name,
+    });
+    similarProperties = (similarRes?.properties ?? [])
+      .filter((item: IProperty) => item.id !== property.id)
+      .slice(0, 3);
+  } catch {
+    similarProperties = [];
+  }
+
+  const specs = [
+    { icon: BedDouble, value: property.bedrooms, label: "Bedrooms" },
+    { icon: Bath, value: property.bathrooms, label: "Bathrooms" },
+    { icon: Maximize, value: `${property.area}`, label: "Sqft" },
+    {
+      icon: Building2,
+      value: property.category?.name ?? "—",
+      label: "Type",
+    },
+  ];
+
+  return (
+    <div className="bg-white pb-24">
+      <Container className="pt-32">
+        {/* Breadcrumb row */}
+        <nav aria-label="Breadcrumb" className="mb-7">
+          <div className="flex items-center justify-between gap-4">
+            <ol className="flex min-w-0 flex-wrap items-center gap-2 text-sm text-slate-500">
+              <li>
+                <Link
+                  href="/"
+                  className="transition-colors hover:text-slate-900"
+                >
+                  Home
+                </Link>
+              </li>
+              <li aria-hidden="true" className="text-slate-300">
+                /
+              </li>
+              <li>
+                <Link
+                  href="/properties"
+                  className="group inline-flex items-center gap-2 font-medium transition-colors hover:text-slate-900"
+                >
+                  <ArrowLeft
+                    className="h-4 w-4 transition-transform duration-300 ease-out-expo group-hover:-translate-x-1"
+                    aria-hidden="true"
+                  />
+                  All listings
+                </Link>
+              </li>
+              <li aria-hidden="true" className="text-slate-300">
+                /
+              </li>
+              <li
+                aria-current="page"
+                className="max-w-[18rem] truncate font-medium text-slate-900"
+              >
+                {property.title}
+              </li>
+            </ol>
+            <PropertyActions propertyId={property.id} title={property.title} />
+          </div>
+        </nav>
+
+        {/* Title */}
+        <header className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-brand-700 bg-brand-50 rounded-full border border-brand-100">
-                {propertyData.category?.name}
-              </span>
-              {propertyData.status === "AVAILABLE" && (
-                <span className="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-50 rounded-full border border-emerald-100 flex items-center gap-1">
-                  <ShieldCheck className="h-3 w-3" /> Available
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+              {property.category?.name ? (
+                <span className="rounded-full border border-brand-100 bg-brand-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-brand-700">
+                  {property.category.name}
+                </span>
+              ) : null}
+              {property.status === "AVAILABLE" ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-emerald-700">
+                  <ShieldCheck className="h-3 w-3" aria-hidden="true" />
+                  Available
+                </span>
+              ) : (
+                <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                  {property.status === "RENTED" ? "Rented" : "Unavailable"}
                 </span>
               )}
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter text-slate-900 leading-[1.1]">
-              {propertyData.title}
+
+            <h1 className="font-display text-title font-semibold tracking-tight text-balance text-slate-900">
+              {property.title}
             </h1>
-            <div className="flex items-center gap-2 mt-5 text-slate-500">
-              <MapPin className="h-5 w-5 text-brand-600" />
-              <p className="text-base">
-                {propertyData.address}, {propertyData.city}, {propertyData.state}
+
+            <p className="mt-4 flex items-start gap-2 text-slate-500">
+              <MapPin
+                className="mt-1 h-4 w-4 shrink-0 text-brand-600"
+                aria-hidden="true"
+              />
+              <span>
+                {/* District/city only — the house and road stay private until
+                    the landlord accepts a request. */}
+                {property.city}
+                {property.state ? `, ${property.state}` : null}
+              </span>
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-x-8 gap-y-5 border-t border-slate-100 pt-6 sm:grid-cols-4 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+            {specs.map((spec) => (
+              <SpecItem
+                key={spec.label}
+                icon={spec.icon}
+                value={spec.value}
+                label={spec.label}
+              />
+            ))}
+          </div>
+        </header>
+
+        {/* Gallery — adapts to however many photos the listing has */}
+        <PropertyGallery images={property.images ?? []} title={property.title} />
+
+        {/* Body */}
+        <div className="mt-14 grid gap-12 lg:grid-cols-3">
+          <div className="space-y-14 lg:col-span-2">
+            <section aria-labelledby="about-heading">
+              <h2
+                id="about-heading"
+                className="font-display text-2xl font-semibold tracking-tight text-slate-900"
+              >
+                About this home
+              </h2>
+              <p className="mt-4 whitespace-pre-line text-lg leading-relaxed text-slate-600">
+                {property.description}
               </p>
-            </div>
-          </div>
 
-          {/* Stats Bar */}
-          <div className="flex items-center gap-8 pb-2 border-t lg:border-t-0 lg:border-l border-slate-100 lg:pl-8 pt-6 lg:pt-0">
-            <div className="flex flex-col items-center gap-1">
-              <Bed className="h-6 w-6 text-slate-400 mb-1" />
-              <span className="text-xl font-bold text-slate-900">{propertyData.bedrooms}</span>
-              <span className="text-xs text-slate-400 font-medium uppercase tracking-wide">Bedrooms</span>
-            </div>
-            <div className="flex flex-col items-center gap-1">
-              <Bath className="h-6 w-6 text-slate-400 mb-1" />
-              <span className="text-xl font-bold text-slate-900">{propertyData.bathrooms}</span>
-              <span className="text-xs text-slate-400 font-medium uppercase tracking-wide">Bathrooms</span>
-            </div>
-            <div className="flex flex-col items-center gap-1">
-              <Maximize className="h-6 w-6 text-slate-400 mb-1" />
-              <span className="text-xl font-bold text-slate-900">{propertyData.area}</span>
-              <span className="text-xs text-slate-400 font-medium uppercase tracking-wide">Sqft</span>
-            </div>
-          </div>
-        </div>
+              <dl className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+                <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
+                  <dt className="text-xs font-medium uppercase tracking-[0.12em] text-slate-400">
+                    Listed on
+                  </dt>
+                  <dd className="mt-1 text-sm font-bold text-slate-800">
+                    {property.createdAt
+                      ? new Date(property.createdAt).toLocaleDateString()
+                      : "—"}
+                  </dd>
+                </div>
+                <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
+                  <dt className="text-xs font-medium uppercase tracking-[0.12em] text-slate-400">
+                    Area
+                  </dt>
+                  <dd className="mt-1 text-sm font-bold text-slate-800 tabular-nums">
+                    {property.area} sqft
+                  </dd>
+                </div>
+                <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
+                  <dt className="text-xs font-medium uppercase tracking-[0.12em] text-slate-400">
+                    City
+                  </dt>
+                  <dd className="mt-1 truncate text-sm font-bold text-slate-800">
+                    {property.city}
+                  </dd>
+                </div>
+                <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
+                  <dt className="text-xs font-medium uppercase tracking-[0.12em] text-slate-400">
+                    Reference
+                  </dt>
+                  <dd className="mt-1 truncate text-sm font-bold text-slate-800">
+                    {property.id}
+                  </dd>
+                </div>
+              </dl>
+            </section>
 
-        {/* Modern Image Gallery */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[450px] md:h-[550px] mb-8 rounded-3xl overflow-hidden">
-          <div className="relative md:col-span-2 md:row-span-2 h-full rounded-3xl md:rounded-none overflow-hidden group">
-            {propertyData.images?.[0] && (
-              <Image
-                src={propertyData.images[0]}
-                alt={propertyData.title}
-                fill
-                sizes="w-100vw"
-                priority
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-            )}
-          </div>
-          <div className="hidden md:block relative h-full overflow-hidden group">
-            {propertyData.images?.[1] && (
-              <Image
-                src={propertyData.images[1]}
-                alt={`${propertyData.title} - Image 2`}
-                fill
-                sizes="33vw"
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-            )}
-          </div>
-          <div className="hidden md:block relative h-full overflow-hidden group">
-            {propertyData.images?.[2] && (
-              <Image
-                src={propertyData.images[2]}
-                alt={`${propertyData.title} - Image 3`}
-                fill
-                sizes="33vw"
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-            )}
-          </div>
-        </div>
+            {property.amenities?.length ? (
+              <section aria-labelledby="amenities-heading">
+                <h2
+                  id="amenities-heading"
+                  className="font-display text-2xl font-semibold tracking-tight text-slate-900"
+                >
+                  What this place offers
+                </h2>
+                <ul className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {property.amenities.map((amenity) => (
+                    <li
+                      key={amenity}
+                      className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white p-3.5 transition-colors hover:border-slate-200 hover:bg-slate-50/60"
+                    >
+                      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-600">
+                        <Check className="h-3.5 w-3.5" aria-hidden="true" />
+                      </span>
+                      <span className="text-sm font-medium text-slate-700">
+                        {amenity}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
 
-        {/* Property Detail Cards (New Section) */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
-          <DetailCard icon={Tag} label="Category" value={propertyData.category?.name || "Uncategorized"} />
-          <DetailCard icon={MapPin} label="Location" value={`${propertyData.city}, ${propertyData.state}`} />
-          <DetailCard icon={Maximize} label="Area (Sqft)" value={String(propertyData.area)} />
-          <DetailCard icon={CalendarDays} label="Listed On" value={new Date(propertyData.createdAt).toLocaleDateString()} />
-        </div>
-
-        {/* Content Grid */}
-        <div className="grid lg:grid-cols-3 gap-12 mb-24">
-          {/* Left Content */}
-          <div className="lg:col-span-2 space-y-12">
-            {/* Description */}
-            <div>
-              <h2 className="text-2xl font-bold text-slate-900 mb-4 tracking-tight">About this property</h2>
-              <p className="text-slate-600 leading-relaxed text-lg whitespace-pre-line">{propertyData.description}</p>
-            </div>
-
-            {/* Amenities */}
-            <div>
-              <h2 className="text-2xl font-bold text-slate-900 mb-6 tracking-tight">Amenities</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {propertyData.amenities?.map((amenity: string, i: number) => (
-                  <div key={i} className="flex items-center gap-3 p-4 rounded-xl bg-slate-50 border border-slate-100 transition-colors hover:bg-white hover:shadow-sm">
-                    <div className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center">
-                      <Check className="h-4 w-4 text-brand-600" />
-                    </div>
-                    <span className="text-sm font-medium text-slate-700">{amenity}</span>
-                  </div>
-                ))}
+            <section aria-labelledby="location-heading">
+              <h2
+                id="location-heading"
+                className="font-display text-2xl font-semibold tracking-tight text-slate-900"
+              >
+                Where it is
+              </h2>
+              <div className="mt-6">
+                <LocationMap city={property.city} state={property.state} />
               </div>
-            </div>
-
-            {/* Google Map Section */}
-            <div>
-              <h2 className="text-2xl font-bold text-slate-900 mb-6 tracking-tight">Location</h2>
-              <GoogleMapComponent
-                address={propertyData.address}
-                city={propertyData.city}
-                state={propertyData.state}
-              />
-            </div>
+            </section>
           </div>
 
-          {/* Right Sidebar (Booking Card) */}
-          <div className="lg:col-span-1">
-            <div className="lg:sticky lg:top-28 space-y-6">
-              <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-6">
-                <div className="pb-6 border-b border-slate-100">
-                  <p className="text-sm text-slate-400 font-medium mb-1">Monthly Rent</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-bold text-slate-900">৳{propertyData.rentAmount?.toLocaleString()}</span>
-                    <span className="text-slate-400 font-medium">/month</span>
-                  </div>
+          {/* Sticky request card */}
+          <aside className="lg:col-span-1">
+            <div className="space-y-5 lg:sticky lg:top-28">
+              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-lift">
+                <div className="border-b border-slate-100 pb-5">
+                  <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-400">
+                    Monthly rent
+                  </p>
+                  <p className="mt-1 flex items-baseline gap-1.5">
+                    <span className="font-display text-4xl font-semibold text-slate-900 tabular-nums">
+                      ৳{property.rentAmount?.toLocaleString()}
+                    </span>
+                    <span className="text-sm font-medium text-slate-400">
+                      / month
+                    </span>
+                  </p>
                 </div>
 
-                <div className="py-6 border-b border-slate-100">
-                  <p className="text-xs uppercase tracking-wider text-slate-400 font-medium mb-3">Listed by</p>
+                <div className="border-b border-slate-100 py-5">
+                  <p className="mb-3 text-xs font-medium uppercase tracking-[0.12em] text-slate-400">
+                    Listed by
+                  </p>
                   <div className="flex items-center gap-3">
-                    <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm shrink-0 bg-slate-100">
-                      <Image
-                        src={propertyData.landlord?.avatar || "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Default_pfp.svg/500px-Default_pfp.svg.png"}
-                        alt={propertyData.landlord?.name || "Landlord"}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div>
-                      <p className="font-bold text-slate-900">{propertyData.landlord?.name}</p>
-                      <p className="text-xs text-slate-500">Verified Landlord</p>
+                    <span className="relative grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full bg-slate-100">
+                      {property.landlord?.avatar ? (
+                        <Image
+                          src={property.landlord.avatar}
+                          alt=""
+                          fill
+                          sizes="44px"
+                          className="object-cover"
+                        />
+                      ) : (
+                        <span className="text-sm font-bold text-slate-500">
+                          {(property.landlord?.name ?? "?")
+                            .split(" ")
+                            .map((part) => part[0])
+                            .join("")
+                            .slice(0, 2)
+                            .toUpperCase()}
+                        </span>
+                      )}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-bold text-slate-900">
+                        {property.landlord?.name ?? "RentNest landlord"}
+                      </p>
+                      <p className="flex items-center gap-1 text-xs text-slate-500">
+                        <ShieldCheck
+                          className="h-3 w-3 text-emerald-600"
+                          aria-hidden="true"
+                        />
+                        Verified landlord
+                      </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-6 space-y-3">
-                  <PropertyRentalRequestModal status={propertyData.status} id={propertyData.id} />
-                  <button className="w-full h-12 rounded-full bg-white text-slate-900 text-sm font-semibold border border-slate-200 hover:bg-slate-50 transition-all flex items-center justify-center gap-2">
-                    <Mail className="h-4 w-4" /> Send Message
-                  </button>
-                  <button className="w-full h-12 rounded-full bg-brand-50 text-brand-700 text-sm font-semibold border border-brand-100 hover:bg-brand-100 transition-all flex items-center justify-center gap-2">
-                    <Phone className="h-4 w-4" /> {propertyData.landlord?.phone}
-                  </button>
+                <div className="space-y-3 pt-5">
+                  <PropertyRentalRequestModal
+                    id={property.id}
+                    status={property.status}
+                    title={property.title}
+                    rentAmount={property.rentAmount}
+                    image={property.images?.[0]}
+                    isAuthenticated={Boolean(user)}
+                    returnTo={`/properties/${property.id}`}
+                  />
+
+                  <a
+                    href={
+                      property.landlord?.phone
+                        ? `tel:${property.landlord.phone}`
+                        : undefined
+                    }
+                    className="flex h-12 w-full items-center justify-center gap-2 rounded-full border border-slate-200 text-sm font-semibold text-slate-800 transition-all duration-300 ease-out-expo hover:-translate-y-0.5 hover:border-slate-900 hover:bg-slate-900 hover:text-white"
+                  >
+                    <Phone className="h-4 w-4" aria-hidden="true" />
+                    {property.landlord?.phone ?? "Call landlord"}
+                  </a>
+
+                  <a
+                    href={`mailto:?subject=${encodeURIComponent(
+                      `Enquiry about ${property.title}`,
+                    )}`}
+                    className="flex h-12 w-full items-center justify-center gap-2 rounded-full border border-brand-100 bg-brand-50 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-100"
+                  >
+                    <Mail className="h-4 w-4" aria-hidden="true" />
+                    Send a message
+                  </a>
                 </div>
               </div>
 
-              <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100 flex items-start gap-3">
-                <ShieldCheck className="h-6 w-6 text-emerald-600 shrink-0 mt-0.5" />
+              <div className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-5">
+                <ShieldCheck
+                  className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600"
+                  aria-hidden="true"
+                />
                 <div>
-                  <p className="text-sm font-bold text-slate-900">Verified Listing</p>
-                  <p className="text-xs text-slate-500 mt-1">
-                    RentNest has checked this property and landlord to ensure safety and authenticity.
+                  <p className="text-sm font-bold text-slate-900">
+                    Verified listing
+                  </p>
+                  <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                    Our team has checked this property and its landlord. Pay
+                    only through RentNest once your request is accepted.
                   </p>
                 </div>
               </div>
             </div>
-          </div>
+          </aside>
         </div>
 
-        {/* Similar Properties Section */}
-        {similarProperties.length > 0 && (
-          <div className="border-t border-slate-100 pt-16">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">
-                Explore Other Properties
-              </h2>
-              <Link href={`/properties`} className="text-sm font-medium text-brand-600 hover:underline hidden md:block">
-                View All
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {similarProperties.map((property: IProperty) => (
-                <PropertyCard key={property.id} property={property} />
+        {/* Similar listings */}
+        {similarProperties.length > 0 ? (
+          <section className="mt-24 border-t border-slate-100 pt-16">
+            <SectionHeader
+              eyebrow="Keep looking"
+              title="Similar homes nearby"
+              subtitle="Same home type, similar budget — in case this one is taken."
+              action={{ href: "/properties", label: "View all listings" }}
+              headingId="similar-heading"
+            />
+            <div className="grid grid-cols-1 gap-7 md:grid-cols-2 lg:grid-cols-3">
+              {similarProperties.map((item) => (
+                <PropertyCard key={item.id} property={item} />
               ))}
             </div>
-          </div>
-        )}
-
-      </div>
+          </section>
+        ) : null}
+      </Container>
     </div>
   );
 };
@@ -302,6 +436,7 @@ const PropertyDetailPage = async ({
   params: Promise<{ id: string }>;
 }) => {
   const { id } = await params;
+
   return (
     <Suspense fallback={<PropertyDetailSkeleton />}>
       <PropertyDetailContent id={id} />

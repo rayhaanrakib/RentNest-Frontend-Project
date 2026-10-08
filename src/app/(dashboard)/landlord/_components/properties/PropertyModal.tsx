@@ -6,10 +6,10 @@ import {
   X, Building2, MapPin, DollarSign, Bed, Bath, Maximize,
   ImagePlus, Plus, Trash2, Loader2,
 } from "lucide-react";
-import { useActionState, useCallback, useEffect, useState, useTransition } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { createProperty, updateProperty } from "@dashboard/landlord/_actions/landlordActions";
-import { IPropertyFormData, ICategorySelect } from "@/types";
+import { IPropertyFormData, IPropertyStatus, ICategorySelect } from "@/types";
 
 interface PropertyModalProps {
   open: boolean;
@@ -31,11 +31,10 @@ const PropertyModal = ({
 }: PropertyModalProps) => {
   const [images, setImages] = useState<string[]>(initialData?.images ?? []);
   const [newImage, setNewImage] = useState("");
-  const [, startTransition] = useTransition();
 
   useEffect(() => {
     if (open) {
-      startTransition(() => setImages(initialData?.images ?? []));
+      setImages(initialData?.images ?? []);
     }
   }, [open, initialData]);
 
@@ -44,9 +43,7 @@ const PropertyModal = ({
       ? updateProperty.bind(null, propertyId)
       : createProperty;
 
-  const [state, formAction, pending] = useActionState(action, { success: false, message: "" });
-
-  const handleClose = useCallback(() => onClose(), [onClose]);
+  const [state, formAction, pending] = useActionState(action, null);
 
   useEffect(() => {
     if (!state) return;
@@ -58,11 +55,11 @@ const PropertyModal = ({
             ? "Property created successfully"
             : "Property updated successfully")
       );
-      handleClose();
+      onClose();
     } else {
       toast.error(state.message || "Something went wrong");
     }
-  }, [state, mode, handleClose]);
+  }, [state]);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";

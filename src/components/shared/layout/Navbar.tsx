@@ -14,7 +14,7 @@ import { getCurrentUser, logoutAction } from "@auth/_actions/authActions";
 import { toast } from "sonner";
 
 // Add any pages here that have a dark hero image/background
-const DARK_HERO_PATHS = ["/", "/about"];
+const DARK_HERO_PATHS = ["/", "/properties", "/about"];
 
 export function Navbar() {
   const pathname = usePathname();

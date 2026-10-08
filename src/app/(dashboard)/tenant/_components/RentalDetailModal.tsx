@@ -4,10 +4,8 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, MapPin, Phone, ArrowRight } from "lucide-react";
 
-import { IRentalRequest } from "@/types";
-
 interface RentalDetailModalProps {
-  rental: IRentalRequest;
+  rental: any;
 }
 
 const RentalDetailModal = ({ rental }: RentalDetailModalProps) => {
@@ -93,7 +91,7 @@ const RentalDetailModal = ({ rental }: RentalDetailModalProps) => {
               <div className="mb-6">
                 <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-2">Your Message</p>
                 <p className="text-sm text-slate-600 italic bg-slate-50 p-3 rounded-lg border border-slate-100">
-                  &ldquo;{rental.message || "No message was provided with this request."}&rdquo;
+                  "{rental.message || "No message was provided with this request."}"
                 </p>
               </div>
 

@@ -3,12 +3,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-export type PaymentState = {
-  success: boolean;
-  errorDetails?: string;
-};
-
-export const makePayment = async (prevState: PaymentState | null, formData: FormData): Promise<PaymentState> => {
+export const makePayment = async (prevState: any, formData: FormData) => {
   const rentalRequestId = formData.get("rentalRequestId") as string;
 
   if (!rentalRequestId) {

@@ -20,7 +20,7 @@ import { useRef } from "react";
 import HeroSearch from "./HeroSearch";
 
 const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2400&q=80";
+  "https://res.cloudinary.com/atwb5lzk/image/upload/v1791432525/1791432361236-01a119b0-1407-7205-ad09-6160741a5cf5.png";
 
 const trustChips = [
   { icon: BadgeCheck, label: "Verified listings" },

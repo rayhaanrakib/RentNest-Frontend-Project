@@ -13,13 +13,13 @@ import {
 import {
   Users,
   UserCheck,
+  UserX,
   Building2,
   Home as HomeIcon,
 } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { generateInitials } from "@/lib/utils";
-import { IUser } from "@/types";
 import UserRowActions from "./UserRowActions";
 
 const statusConfig: Record<
@@ -154,7 +154,7 @@ const UsersList = async ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users.map((user: IUser) => {
+            {users.map((user: any) => {
               const userStatus =
                 statusConfig[user.status] ?? statusConfig.ACTIVE;
               const userRole = roleConfig[user.role] ?? roleConfig.TENANT;

@@ -1,6 +1,6 @@
 const PropertySkeleton = () => {
   return (
-    <div className="relative h-[440px] rounded-[2rem] overflow-hidden shadow-sm bg-slate-200 animate-pulse">
+    <div className="relative h-[26rem] rounded-[1.75rem] overflow-hidden shadow-sm bg-slate-200 animate-pulse">
       {/* Top Badge Skeleton */}
       <div className="absolute top-6 left-6 z-10">
         <div className="h-7 w-24 rounded-full bg-slate-300/80"></div>

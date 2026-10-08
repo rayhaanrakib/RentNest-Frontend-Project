@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  X, Mail, Phone, Calendar,
+  X, User, Mail, Phone, Calendar,
   Building2, Home, Star, Loader2,
   ShieldCheck, ShieldOff,
 } from "lucide-react";
@@ -11,7 +11,7 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { getAdminUserDetail, updateUserStatus } from "@dashboard/admin/_actions/adminActions";
 import { generateInitials } from "@/lib/utils";
-import { IUser, IUserStatus } from "@/types";
+import { IUserStatus } from "@/types";
 import { useRouter } from "next/navigation";
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; dot: string }> = {
@@ -39,28 +39,17 @@ const UserDetailModal=({
   userId: string;
 })=> {
   const router = useRouter();
-  const [user, setUser] = useState<IUser | null>(null);
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [toggling, setToggling] = useState(false);
-  const [, startTransition] = useTransition();
 
   useEffect(() => {
     if (open && userId) {
-      let cancelled = false;
-      startTransition(() => setLoading(true));
+      setLoading(true);
       getAdminUserDetail(userId)
-        .then((data) => {
-          if (!cancelled) setUser(data);
-        })
-        .catch(() => {
-          if (!cancelled) toast.error("Failed to load user details");
-        })
-        .finally(() => {
-          if (!cancelled) setLoading(false);
-        });
-      return () => {
-        cancelled = true;
-      };
+        .then((data) => setUser(data))
+        .catch(() => toast.error("Failed to load user details"))
+        .finally(() => setLoading(false));
     }
   }, [open, userId]);
 

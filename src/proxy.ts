@@ -95,7 +95,8 @@ export async function proxy(request: NextRequest) {
   // Authentication
   if (!accessToken && !isPublicRoute && !isAuthRoute) {
     const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("callbackUrl", pathname);
+    // LoginForm reads `redirectTo` and loginAction sends the user back there.
+    loginUrl.searchParams.set("redirectTo", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
@@ -115,5 +116,9 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|favicon.ico|_next/image|.*\\.png$).*)"],
+  // Static assets must never be routed through auth — the previous matcher
+  // only excluded .png, so any .jpg/.svg in /public was redirected to /login.
+  matcher: [
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpe?g$|.*\\.webp$|.*\\.gif$|.*\\.svg$|.*\\.ico$|.*\\.avif$).*)",
+  ],
 };

@@ -17,5 +17,5 @@ export type RentalRequestState = {
   };
   errorMessage?: string;
   errorDetails?: string;
-  data?: unknown;
+  data?: any;
 };

@@ -1,9 +1,5 @@
-"use client";
-
 import { Suspense } from "react";
 import { getTenantRentalReviews } from "@dashboard/tenant/_actions/tenantActions";
-import { IReview } from "@/types";
-import Image from "next/image";
 
 const ReviewsSkeleton = () => {
   return (
@@ -32,20 +28,20 @@ const ReviewsList = async () => {
     return (
       <div className="bg-white p-12 text-center rounded-2xl border border-slate-100 shadow-sm">
         <p className="text-sm font-medium text-slate-800 mb-1">No reviews yet</p>
-            <p className="text-sm text-slate-500">Reviews you&apos;ve left on properties will appear here.</p>
+        <p className="text-sm text-slate-500">Reviews you leave on properties will appear here.</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      {reviews.map((review: IReview) => (
+      {reviews.map((review: any) => (
         <div key={review.id} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
           <div className="flex items-start gap-4">
             {/* Property Image */}
-            <div className="w-12 h-12 rounded-xl bg-slate-100 overflow-hidden flex-shrink-0 relative">
+            <div className="w-12 h-12 rounded-xl bg-slate-100 overflow-hidden flex-shrink-0">
               {review.property?.images?.[0] && (
-                <Image src={review.property.images[0]} alt="" fill className="object-cover" sizes="48px" />
+                <img src={review.property.images[0]} alt="" className="w-full h-full object-cover" />
               )}
             </div>
 
@@ -81,7 +77,7 @@ const ReviewsPage = () => {
     <div className="space-y-6 p-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">My Reviews</h1>
-        <p className="text-slate-500 text-sm mt-1">Feedback you&apos;ve left for rented properties.</p>
+        <p className="text-slate-500 text-sm mt-1">Feedback you've left for rented properties.</p>
       </div>
 
       <Suspense fallback={<ReviewsSkeleton />}>

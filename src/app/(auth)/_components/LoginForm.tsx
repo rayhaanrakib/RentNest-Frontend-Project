@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import { GoogleIcon, GithubIcon } from "@/components/icons/sharedIcon";
@@ -8,6 +8,13 @@ import { authLinks } from "@/components/shared/layout/Links";
 import { toast } from "sonner";
 import { loginAction } from "@auth/_actions/authActions";
 import { useSearchParams } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { DEMO_EMAILS, DEMO_PASSWORD, type DemoRole } from "@/lib/demo";
+import DemoLoginSection from "@auth/_components/DemoLoginSection";
+
+
+const DEMO_SUBMIT_DELAY = 420;
+const DEMO_FLASH_DURATION = 1500;
 
 const LoginForm = () => {
   const searchParams = useSearchParams();
@@ -22,12 +29,57 @@ const LoginForm = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
+  //   demo login
+  const formRef = useRef<HTMLFormElement>(null);
+  const timersRef = useRef<number[]>([]);
+  const submittedRef = useRef(false);
+  const [demoRole, setDemoRole] = useState<DemoRole | null>(null);
+  const [flashCredentials, setFlashCredentials] = useState(false);
+
   useEffect(() => {
     if (!state) return;
     if (!state.success && state.errorDetails) {
       toast.error(state.errorDetails);
     }
   }, [state]);
+
+  useEffect(() => {
+    const timers = timersRef.current;
+    return () => {
+      timers.forEach((timer) => clearTimeout(timer));
+    };
+  }, []);
+
+  useEffect(() => {
+    if (pending) {
+      submittedRef.current = true;
+      return;
+    }
+    if (!submittedRef.current) return;
+    submittedRef.current = false;
+    setDemoRole(null);
+    setFlashCredentials(false);
+  }, [pending]);
+
+  /** Fill the form with a demo account's credentials and sign straight in. */
+  const handleDemoLogin = (role: DemoRole) => {
+    if (pending || demoRole) return;
+
+    setEmail(DEMO_EMAILS[role]);
+    setPassword(DEMO_PASSWORD);
+    setDemoRole(role);
+    setFlashCredentials(true);
+
+    timersRef.current.push(
+      window.setTimeout(
+        () => formRef.current?.requestSubmit(),
+        DEMO_SUBMIT_DELAY,
+      ),
+      window.setTimeout(() => setFlashCredentials(false), DEMO_FLASH_DURATION),
+    );
+  };
+
+  const submitting = pending || demoRole !== null;
 
   return (
     <div className="w-full max-w-sm space-y-8">
@@ -40,7 +92,7 @@ const LoginForm = () => {
         </p>
       </div>
 
-      <form action={action} className="space-y-5">
+      <form ref={formRef} action={action} className="space-y-5">
         <div className="space-y-2">
           <label
             htmlFor="email"
@@ -59,9 +111,12 @@ const LoginForm = () => {
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className={`w-full h-11 pl-10 pr-4 rounded-lg bg-muted/50 border text-sm placeholder:text-muted-foreground/80 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all ${
-                state?.errors?.email ? "border-destructive" : "border-border"
-              }`}
+              className={cn(
+                "w-full h-11 pl-10 pr-4 rounded-lg bg-muted/50 border text-sm placeholder:text-muted-foreground/80 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all",
+                state?.errors?.email ? "border-destructive" : "border-border",
+                flashCredentials &&
+                  "border-brand-500 ring-2 ring-brand-500/25 animate-demo-fill",
+              )}
             />
           </div>
           {state?.errors?.email && (
@@ -103,9 +158,12 @@ const LoginForm = () => {
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className={`w-full h-11 pl-10 pr-10 rounded-lg bg-muted/50 border text-sm placeholder:text-muted-foreground/80 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all ${
-                state?.errors?.password ? "border-destructive" : "border-border"
-              }`}
+              className={cn(
+                "w-full h-11 pl-10 pr-10 rounded-lg bg-muted/50 border text-sm placeholder:text-muted-foreground/80 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all",
+                state?.errors?.password ? "border-destructive" : "border-border",
+                flashCredentials &&
+                  "border-brand-500 ring-2 ring-brand-500/25 animate-demo-fill",
+              )}
             />
             <button
               type="button"
@@ -129,16 +187,26 @@ const LoginForm = () => {
 
         <button
           type="submit"
-          disabled={pending}
+          disabled={submitting}
+          aria-busy={submitting}
           className="w-full h-11 flex items-center justify-center rounded-lg bg-foreground text-background text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer"
         >
-          {pending ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+          {submitting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="sr-only">Signing in</span>
+            </>
           ) : (
             "Sign In with Email"
           )}
         </button>
       </form>
+
+      <DemoLoginSection
+        activeRole={demoRole}
+        disabled={submitting}
+        onSelect={handleDemoLogin}
+      />
 
       <div className="relative">
         <div className="absolute inset-0 flex items-center">

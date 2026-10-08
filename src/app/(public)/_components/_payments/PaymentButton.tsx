@@ -16,7 +16,7 @@ const PaymentButton = ({
 }: {
   rentalRequestId: string;
 }) => {
-  const [state, action, pending] = useActionState(makePayment, { success: false, errorDetails: undefined });
+  const [state, action, pending] = useActionState(makePayment, null);
 
   useEffect(() => {
     if (state && !state.success) {
